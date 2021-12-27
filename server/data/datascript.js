@@ -71,17 +71,44 @@ function generateTimeSeriesFiles(countries, indicators) {
         df = await df.transpose();
 
         //rename columns
-        let colNames = [];
+        let newNames = [];
         await Promise.all(df.listColumns().map(async column => {
             const newName = df.getRow(df.count() - 1).get(column)
-            colNames.push(newName);
+            newNames.push(newName);
         }));
-        df = await df.renameAll(colNames);
+        df = await df.renameAll(newNames);
         df = await df.head(df.count() - 1);
+        df = await df.withColumn('Year', (row, index) => 1971 + index);
+        let newCols = ['Year'];
+        newCols.push(...df.drop('Year').listColumns());
+        df = await df.restructure(newCols);
 
         df.toCSV(true, indicator.name + '.csv');
     })
 }
+
+function valueScaler(a, b) {
+    return (a/b).toFixed(2);
+}
+
+/*function generateCompoundFile(countryList) {
+    const compoundData = [
+        {name: gdpPerCapita, values = ['gdp', 'population']},
+        {name: co2_ktPerCapita, values = ['co2_kt', 'population']},
+        {name: co2_ktPerGdp, values = ['co2_kt', 'gdp']}
+    ];
+
+    compoundData.map(variable => {
+        const var1 = variable.values[0];
+        const var2 = variable.values[1];
+        const df1 = await DataFrame.fromCSV(__dirname + '/' + var1 + '.csv');
+        const df2 = await DataFrame.fromCSV(__dirname + '/' + var2 + '.csv');
+
+        df1.listColumns().map(country => {
+
+        })
+    });
+}*/
 
 async function main() {
     const countryList = await getCountryList();
