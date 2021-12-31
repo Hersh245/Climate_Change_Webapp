@@ -2,20 +2,24 @@ var express = require("express");
 var router = express.Router();
 const DataFrame = require("dataframe-js").DataFrame;
 
-var getEmissionData = require("../getEmissionData");
+var getEmissionData = require("../functions/getEmissionData");
+var getCountryData = require("../functions/getCountryData")
 
-router.get("/", (req, res) => {
-  res.send("Enter Country Id");
+router.get("/", async (req, res) => {
+  const countryData = JSON.parse(await getCountryData())
+  res.send(countryData.id);
 });
 
 router.get("/:countryId", async (req, res) => {
   const id = String(req.params.countryId);
   const emissionData = JSON.parse(await getEmissionData());
   emissionValues = emissionData[id];
-  emissionValues
-    ? res.send(emissionValues)
-    : res.send("Invalid Country or No Data");
-  //res.send(id)
+  if(emissionValues) {
+    res.send(emissionValues)
+  }
+  else {
+    res.send("Invalid Country or No Data");
+  }
 });
 
 router.get("/:countryId/year", async (req, res) => {
