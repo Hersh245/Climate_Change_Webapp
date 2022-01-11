@@ -14,8 +14,9 @@ const getRow = (data, index) => {
     return row;
   };
 
-router.get('/', (req, res) => {
-    res.send('Enter year')
+router.get('/', async (req, res) => {
+    const emissionData = JSON.parse(await getEmissionData());
+    res.send(emissionData.Year)
 })
 
 router.get("/:year", async (req, res) => {
@@ -34,6 +35,25 @@ router.get("/:year", async (req, res) => {
         res.send(err);
     }
   });
+
+  router.get("/:year/index", async (req, res) => {
+    const year = parseInt(req.params.year);
+    const emissionData = await getEmissionData();
+    try {
+        const yearValues = getRow(emissionData, year - 1971)
+        if(yearValues) {
+            res.send(String(year - 1971))
+          }
+        else {
+             res.send("Invalid Year or No Data");
+            }
+    }
+    catch (err) {
+        res.send(err);
+    }
+  });
+
+  
 
 
 
